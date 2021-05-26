@@ -21,6 +21,7 @@ return [
         'view' => 'View',
         'edit' => 'Edit',
         'remove' => 'Remove',
+        'duplicate' => 'Duplicate',
         'add-new-page' => 'Add new page',
         'edit-page' => 'Edit page',
         'back' => 'Back',
@@ -28,6 +29,7 @@ return [
         'theme' => 'Theme',
         'visible-in-page-overview' => 'visible in page overview',
         'page-created' => 'Page successfully created',
+        'page-duplicated' => 'Page successfully duplicated',
         'page-updated' => 'Page successfully updated',
         'page-deleted' => 'Page removed',
 

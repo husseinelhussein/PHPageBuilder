@@ -2,6 +2,7 @@
 
 namespace PHPageBuilder\Repositories;
 
+use PHPageBuilder\Page;
 use PHPageBuilder\Contracts\PageContract;
 use PHPageBuilder\Contracts\PageRepositoryContract;
 use Exception;
@@ -46,10 +47,11 @@ class PageRepository extends BaseRepository implements PageRepositoryContract
                 return false;
             }
         }
-
+        $builderData = isset($data['data'])? $data['data']: null;
         $page = parent::create([
             'name' => $data['name'],
             'layout' => $data['layout'],
+            'data' => $builderData,
         ]);
         if (! ($page instanceof PageContract)) {
             throw new Exception("Page not of type PageContract");
@@ -140,5 +142,67 @@ class PageRepository extends BaseRepository implements PageRepositoryContract
         $this->findWithId($id)->invalidateCache();
 
         return parent::destroy($id);
+    }
+
+    public function duplicate(Page $page){
+        $translations = $page->getTranslations();
+        $buildrData = $page->getBuilderData();
+        $pb_data = [
+            'layout' => $page->getLayout(),
+            'title' => [],
+            'route' => [],
+            'data' => json_encode($buildrData),
+        ];
+        foreach ($translations as $langCode => $translation) {
+            foreach (array_keys($translation) as $prop) {
+                if(is_int($prop)){
+                    unset($translation[$prop]);
+                }
+            }
+            $newTitle = $this->generateUniqueTitle($translation['title']);
+            if(!isset($pb_data['name'])){
+                $pb_data['name'] = $newTitle;
+            }
+            $pb_data['title'][$langCode] = $newTitle;
+            $pb_data['route'][$langCode] = $this->generateUniqueRoute($translation['route']);
+        }
+        $pb_page = $this->create($pb_data);
+        $m = 'Something went wrong, failed to create page';
+        if(!$pb_page){
+            throw new Exception($m);
+        }
+        return true;
+    }
+
+    protected function generateUniqueRoute($existingRoute) {
+        $route = $this->generateUniqueColVal('route', $existingRoute);
+        return $route;
+    }
+
+    protected function generateUniqueTitle($existingTitle) {
+        $name = $this->generateUniqueColVal('title', $existingTitle, true);
+        return $name;
+    }
+
+    protected function generateUniqueColVal($col, $exitingVal, $space = false) {
+        $pb_page_tr_repo = new PageTranslationRepository;
+        $number = 2;
+        do {
+            // remove any existing numbers
+            $exitingVal = preg_replace(['/(\s\-\s)\d+/','/(\-)\d+/'], '', $exitingVal);
+            $exitingVal = preg_replace('/\-\d+/', '', $exitingVal);
+            if ($space) {
+                $newVal = preg_replace('/\s\d+/', '', $exitingVal);
+                $newVal .= ' - ' . $number;
+            }
+            else {
+                $newVal = $exitingVal;
+                $newVal .= '-' . $number;
+            }
+            $pb_page = $pb_page_tr_repo->findWhere($col, $newVal);
+            $number++;
+        }
+        while ( !empty($pb_page) );
+        return $newVal;
     }
 }

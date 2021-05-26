@@ -51,6 +51,8 @@ class WebsiteManager implements WebsiteManagerContract
                 exit();
             } else if ($action === 'destroy') {
                 $this->handleDestroy($page);
+            } else if ($action === 'duplicate') {
+                $this->handleDuplicate($page);
             }
         }
     }
@@ -107,6 +109,21 @@ class WebsiteManager implements WebsiteManagerContract
         phpb_redirect(phpb_url('website_manager'), [
             'message-type' => 'success',
             'message' => phpb_trans('website-manager.page-deleted')
+        ]);
+    }
+
+    /**
+     * Handle requests to duplicate the given page.
+     *
+     * @param PageContract $page
+     */
+    public function handleDuplicate(PageContract $page)
+    {
+        $pageRepository = new PageRepository;
+        $pageRepository->duplicate($page);
+        phpb_redirect(phpb_url('website_manager'), [
+            'message-type' => 'success',
+            'message' => phpb_trans('website-manager.page-duplicated')
         ]);
     }
 

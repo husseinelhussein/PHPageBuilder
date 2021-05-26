@@ -70,6 +70,9 @@ $settingsTabActive = isset($_GET['tab']) && $_GET['tab'] === 'settings' ? 'activ
                                         <a href="<?= phpb_url('website_manager', ['route' => 'page_settings', 'action' => 'destroy', 'page' => $page->getId()]) ?>" class="btn btn-danger btn-sm">
                                             <span><?= phpb_trans('website-manager.remove') ?></span> <i class="fas fa-trash"></i>
                                         </a>
+                                        <a href="<?= phpb_url('website_manager', ['route' => 'page_settings', 'action' => 'duplicate', 'page' => $page->getId()]) ?>" class="btn btn-danger btn-sm">
+                                            <span><?= phpb_trans('website-manager.duplicate') ?></span> <i class="fas fa-copy"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php
